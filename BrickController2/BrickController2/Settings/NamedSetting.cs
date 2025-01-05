@@ -32,4 +32,7 @@ public record NamedSetting
 
     [JsonIgnore]
     public bool IsEnumType => Type.IsEnum;
+
+    [JsonIgnore]
+    public bool IsDoubleType => Type == typeof(double);
 }

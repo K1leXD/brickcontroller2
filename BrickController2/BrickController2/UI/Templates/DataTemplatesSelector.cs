@@ -9,6 +9,8 @@ public class DataTemplatesSelector : DataTemplateSelector
 
     public DataTemplate EnumDataTemplate { get; set; } = default!;
 
+    public DataTemplate DoubleDataTemplate { get; set; } = default!;
+
     protected override DataTemplate OnSelectTemplate(object item, BindableObject container)
     {
         var itemType = item.GetType();
@@ -17,6 +19,8 @@ public class DataTemplatesSelector : DataTemplateSelector
             return BoolDataTemplate;
         if (itemType == typeof(EnumSettingViewModel))
             return EnumDataTemplate;
+        if (itemType == typeof(DoubleSettingViewModel))
+            return DoubleDataTemplate;
 
         return default!;
     }

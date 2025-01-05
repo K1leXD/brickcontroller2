@@ -83,6 +83,10 @@ public abstract class SettingsPageViewModelBase : PageViewModelBase
         {
             return new EnumSettingViewModel(setting, this, TranslationService);
         }
+        if (setting.IsDoubleType)
+        {
+            return new DoubleSettingViewModel(setting, this, TranslationService);
+        }
 
         throw new InvalidOperationException($"The specified type {setting.Type} is not supported.");
     }

@@ -669,4 +669,28 @@
   <data name="_defaultGroup" xml:space="preserve">
     <value>Allgemeine Einstellungen</value>
   </data>
+  <data name="BuWizz3CurentLimitPowerFunctions" xml:space="preserve">
+    <value>Stromgrenzen für PF-Kanäle (mA)</value>
+  </data>
+  <data name="BuWizz3CurentLimitPoweredUp" xml:space="preserve">
+    <value>Stromgrenzen für PU-Kanäle (mA)</value>
+  </data>
+  <data name="BuWizz3Channel0" xml:space="preserve">
+    <value>1</value>
+  </data>
+  <data name="BuWizz3Channel1" xml:space="preserve">
+    <value>2</value>
+  </data>
+  <data name="BuWizz3Channel2" xml:space="preserve">
+    <value>3</value>
+  </data>
+  <data name="BuWizz3Channel3" xml:space="preserve">
+    <value>4</value>
+  </data>
+  <data name="BuWizz3ChannelA" xml:space="preserve">
+    <value>A</value>
+  </data>
+  <data name="BuWizz3ChannelB" xml:space="preserve">
+    <value>B</value>
+  </data>
 </root>
