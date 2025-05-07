@@ -5,7 +5,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using BrickController2.Helpers;
 using BrickController2.PlatformServices.BluetoothLE;
-using static BrickController2.Protocols.BluetoothLowEnergy;
 
 namespace BrickController2.DeviceManagement
 {
@@ -69,8 +68,7 @@ namespace BrickController2.DeviceManagement
                 return await _bleService.ScanDevicesAsync(
                     async scanResult =>
                     {
-                        var deviceInfo = GetDeviceIfo(scanResult);
-                        if (deviceInfo.DeviceType != DeviceType.Unknown)
+                        if (TryGetDevice(scanResult, out var deviceInfo))
                         {
                             await deviceFoundCallback(deviceInfo.DeviceType, deviceInfo.DeviceName, deviceInfo.DeviceAddress, deviceInfo.ManufacturerData);
                         }
@@ -142,98 +140,20 @@ namespace BrickController2.DeviceManagement
             return scanTaskList.All(scanTask => scanTask.Result);
         }
 
-        private FoundDevice GetDeviceIfo(ScanResult scanResult)
+        private bool TryGetDevice(ScanResult scanResult, out FoundDevice device)
         {
-            IDictionary<byte, byte[]> advertismentData = scanResult.AdvertismentData;
-            if (advertismentData == null)
+            if (scanResult.AdvertismentData != null)
             {
-                return FoundDevice.Unknown;
+                FoundDevice foundDevice = default;
+                if (_bleDeviceManagers.Any(c => c.TryGetDevice(scanResult, out foundDevice)))
+                {
+                    device = foundDevice;
+                    return true;
+                }
             }
 
-            if (!advertismentData.TryGetValue(ADTYPE_MANUFACTURER_SPECIFIC, out var manufacturerData) || manufacturerData.Length < 2)
-            {
-                var result = GetDeviceInfoByService(advertismentData);
-                return new FoundDevice(result.DeviceType, scanResult.DeviceName, scanResult.DeviceAddress, result.ManufacturerData);
-            }
-
-            var foundDevice = new FoundDevice(DeviceType.Unknown, scanResult.DeviceName, scanResult.DeviceAddress, manufacturerData);
-            var manufacturerDataString = BitConverter.ToString(manufacturerData).ToLower();
-            var manufacturerId = manufacturerDataString.Substring(0, 5);
-
-            switch (manufacturerId)
-            {
-                case "98-01": return foundDevice with { DeviceType = DeviceType.SBrick };
-                case "48-4d": return foundDevice with { DeviceType = DeviceType.BuWizz };
-                case "4e-05":
-                    if (advertismentData.TryGetValue(ADTYPE_LOCAL_NAME_COMPLETE, out byte[]? completeLocalName))
-                    {
-                        var completeLocalNameString = BitConverter.ToString(completeLocalName).ToLower();
-                        if (completeLocalNameString == "42-75-57-69-7a-7a") // BuWizz
-                        {
-                            return foundDevice with { DeviceType = DeviceType.BuWizz2 };
-                        }
-                        else
-                        {
-                            return foundDevice with { DeviceType = DeviceType.BuWizz3 };
-                        }
-                    }
-                    break;
-                case "05-45": // BuWizz2 has new ID since firmware 1.2.30
-                    if (advertismentData.TryGetValue(ADTYPE_LOCAL_NAME_COMPLETE, out byte[]? buwizzName))
-                    {
-                        var completeLocalNameString = BitConverter.ToString(buwizzName).ToLower();
-                        if (completeLocalNameString == "42-75-57-69-7a-7a-32") // BuWizz2
-                        {
-                            return foundDevice with { DeviceType = DeviceType.BuWizz2 };
-                        }
-                    }
-                    break;
-                case "97-03":
-                    if (manufacturerDataString.Length >= 11)
-                    {
-                        var pupType = manufacturerDataString.Substring(9, 2);
-                        switch (pupType)
-                        {
-                            case "40": return foundDevice with { DeviceType = DeviceType.Boost };
-                            case "41": return foundDevice with { DeviceType = DeviceType.PoweredUp };
-                            case "80": return foundDevice with { DeviceType = DeviceType.TechnicHub };
-                            case "84": return foundDevice with { DeviceType = DeviceType.TechnicMove };
-                            case "20": return foundDevice with { DeviceType = DeviceType.DuploTrainHub };
-                        }
-                    }
-                    break;
-                case "33-ac": return foundDevice with { DeviceType = DeviceType.MK_DIY };
-            }
-
-            if(_bleDeviceManagers.Any(c => c.TryGetDevice(manufacturerId, manufacturerData, ref foundDevice)))
-            {
-                return foundDevice;
-            }
-
-            return FoundDevice.Unknown;
-        }
-
-        private (DeviceType DeviceType, byte[]? ManufacturerData) GetDeviceInfoByService(IDictionary<byte, byte[]> advertismentData)
-        {
-            // 0x06: 128 bits Service UUID type
-            if (!advertismentData.TryGetValue(ADTYPE_SERVICE_128BIT, out byte[]? serviceData) || serviceData.Length < 16)
-            {
-                return (DeviceType.Unknown, null);
-            }
-
-            var serviceGuid = serviceData.GetGuid();
-
-            switch (serviceGuid)
-            {
-                case var service when service == CircuitCubeDevice.SERVICE_UUID:
-                    return (DeviceType.CircuitCubes, null);
-
-                case var service when service == Wedo2Device.SERVICE_UUID:
-                    return (DeviceType.WeDo2, null);
-
-                default:
-                    return (DeviceType.Unknown, null);
-            };
+            device = default;
+            return false;
         }
     }
 }
