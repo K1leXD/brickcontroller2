@@ -37,6 +37,7 @@ namespace BrickController2.DeviceManagement.DI
             builder.RegisterType<MK6>().Keyed<Device>(DeviceType.MK6);
             builder.RegisterType<MK_DIY>().Keyed<Device>(DeviceType.MK_DIY);
             builder.RegisterType<CaDARaceCar>().Keyed<Device>(DeviceType.CaDA_RaceCar);
+            builder.RegisterType<PfxBrickDevice>().Keyed<Device>(DeviceType.PfxBrick);
 
             builder.Register<DeviceFactory>(c =>
             {
@@ -61,6 +62,7 @@ namespace BrickController2.DeviceManagement.DI
             builder.RegisterDeviceManager<CircuitCubeDeviceManager>();
             builder.RegisterDeviceManager<LegoDeviceManager>();
             builder.RegisterDeviceManager<MouldKingDeviceManager>();
+            builder.RegisterDeviceManager<PfxBrickDeviceManager>();
             builder.RegisterDeviceManager<SBrickDeviceManager>();
         }
     }
