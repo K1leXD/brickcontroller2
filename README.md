@@ -31,6 +31,11 @@ Cross platform mobile application for controlling your creations using a bluetoo
 - CaDA Race Car
 - PFx Brick (lights & Power Functions ports only)
 
+## Supported controllers
+- Generic Bluetooth / USB gamepads
+- LEGO® Power Functions infrared remotes (part numbers 8885 and 8879) — requires an Android device with an IR emitter
+- LEGO® Powered Up Remote (part number 88010)
+
 ## Project details
 
 BrickController 2 is a MAUI application and can be compiled using Visual Studio 2026 (Professional, Enterprise and Community Editions)
